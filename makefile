@@ -1,3 +1,6 @@
+# Detect OS
+uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
+
 # Sets of flags
 REALSENSE_FLAGS := -Iinclude -Llib -lrealsense -lm
 
@@ -8,6 +11,12 @@ OPENCV_FLAGS := -ggdb `pkg-config --cflags opencv` `pkg-config --libs opencv`
 CXXFLAGS := -std=c++11 -fPIC -pedantic -mssse3 -Ofast -Wno-missing-field-initializers
 
 LIBCURL_FLAGS := -lcurl
+
+ifeq ($(uname_S),Darwin)
+# In case of OSX
+
+endif
+
 
 # Compute a list of all example program binaries
 SOURCES := $(wildcard src/*.cpp)
