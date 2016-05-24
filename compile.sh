@@ -1,6 +1,6 @@
 #!/bin/bash
 
-g++ realsense_gesture_capture.cpp \
+g++ src/realsense_gesture_capture.cpp \
   -ggdb `pkg-config --cflags opencv` \
   `pkg-config --libs opencv` \
   -std=c++11 \
