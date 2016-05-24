@@ -1,5 +1,5 @@
 # gesture_capture
-A program to deal depth image from realsense with opencv and send curl request.
+A project to deal depth image from realsense with opencv and send curl request.
 
 # Requirements
 - librealsense
