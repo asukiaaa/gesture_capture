@@ -1,5 +1,5 @@
 # gesture_capture
-A project to deal depth image from realsense with opencv and send curl request.
+A project to deal depth image from realsense with using opencv and send curl request.
 
 # Requirements
 - librealsense
@@ -13,5 +13,5 @@ make
 sudo ./bin/gesture_capture
 ```
 
-# Lisence
+# License
 MIT
