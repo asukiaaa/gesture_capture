@@ -1,11 +1,15 @@
 //
-// Gets depth from realsense.
-// Shows the image with using opencv.
-// Sends a request with using libcurl.
+// This program does the following process.
+// - Gets depth from realsense.
+// - Shows the image with using opencv.
+// - Sends a request with using libcurl by depth status.
 //
-// 2016.05.24 Aruki Kono
+// 2016.05.24 Asuki Kono
+//
+// License
 //
 // reference: librealsense tutorial #1(Apache 2.0)
+// https://github.com/IntelRealSense/librealsense/blob/master/examples/cpp-tutorial-1-depth.cpp
 //
 #include <cstdio>
 #include <curl/curl.h>
