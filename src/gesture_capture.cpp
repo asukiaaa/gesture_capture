@@ -48,9 +48,9 @@ int main() try
 
     while(true)
     {
-      grav_x = 0;
-      grav_y = 0;
-      grav_count = 0;
+        grav_x = 0;
+        grav_y = 0;
+        grav_count = 0;
 
         // This call waits until a new coherent set of frames is available on a device
         // Calls to get_frame_data(...) and get_frame_timestamp(...) on a device will return stable values until wait_for_frames(...) is called
@@ -76,43 +76,33 @@ int main() try
 
                 //img->imageData[(y*img->widthStep) + x] = depth/50;
                 char* target_pixel = &(img->imageData[(y*img->widthStep) + x]);
-                if ( TARGET_DEPTH_MIN < depth &&
-                     depth < TARGET_DEPTH_MAX) {
-                  //*target_pixel = depth/50;
-                  *target_pixel = (char)255;
-                  grav_x += x;
-                  grav_y += y;
-                  grav_count ++;
-                } else {
-                  *target_pixel = 0;
+                if ( TARGET_DEPTH_MIN < depth && depth < TARGET_DEPTH_MAX)
+                {
+                    //*target_pixel = depth/50;
+                    *target_pixel = (char)255;
+                    grav_x += x;
+                    grav_y += y;
+                    grav_count ++;
                 }
-            }
+                else
+                {
+                    *target_pixel = (char)0;
+                }
+            string curl_command = "";
+            //curl_command = "curl http://192.168.11.21.:8080/shake/2/cube";
+            // 0.2 means x acceleration
+            // curl_command = "curl http://192.168.11.21.:8080/shake/1/cube/0.2/0/0";
 
-        }
+            curl_command = "curl http://192.168.11.21.:8080/shake/1/cube/";
 
-        if ( grav_count != 0 ) {
-          grav_x = grav_x / grav_count;
-          grav_y = grav_y / grav_count;
-        }
+            float x_accel = ((float)grav_x / 640) - 0.5;
 
-        printf("%d, %d, %d\n", grav_x, grav_y, grav_count);
+            //printf("%f ", x_accel);
+            curl_command += to_string(x_accel);
+            curl_command += "/0/0";
 
-        if ( grav_count > 1000 ) {
-          string curl_command = "";
-          //curl_command = "curl http://192.168.11.21.:8080/shake/2/cube";
-          // 0.2 means x acceleration
-          // curl_command = "curl http://192.168.11.21.:8080/shake/1/cube/0.2/0/0";
-
-          curl_command = "curl http://192.168.11.21.:8080/shake/1/cube/";
-
-          float x_accel = ((float)grav_x / 640) - 0.5;
-
-          //printf("%f ", x_accel);
-          curl_command += to_string(x_accel);
-          curl_command += "/0/0";
-
-          printf("%s\n", curl_command.c_str());
-          system((const char*)curl_command.c_str());
+            printf("%s\n", curl_command.c_str());
+            system((const char*)curl_command.c_str());
         }
 
         cvShowImage("opencvtest", img);
