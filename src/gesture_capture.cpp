@@ -102,8 +102,8 @@ int main() try {
   // Opencv values
   IplImage* img = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, 1);
   cvNamedWindow("realsense_depth", CV_WINDOW_AUTOSIZE);
-  cvShowImage("realsense_depth", img);
 
+  // Gravity values
   int grav_x;
   int grav_y;
   int grav_count;
