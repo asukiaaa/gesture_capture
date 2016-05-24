@@ -9,11 +9,12 @@
 #include <librealsense/rs.hpp>
 #include <cstdio>
 #include <opencv2/highgui/highgui.hpp>
+#include <string>
 
 #define TARGET_DEPTH_MIN 1000
 #define TARGET_DEPTH_MAX 2500
 
-
+using namespace std;
 
 int main() try
 {
@@ -89,11 +90,35 @@ int main() try
 
         }
 
+        if ( grav_count != 0 ) {
+          grav_x = grav_x / grav_count;
+          grav_y = grav_y / grav_count;
+        }
+
         printf("%d, %d, %d\n", grav_x, grav_y, grav_count);
+
+        if ( grav_count > 1000 ) {
+          string curl_command = "";
+          //curl_command = "curl http://192.168.11.21.:8080/shake/2/cube";
+          // 0.2 means x acceleration
+          // curl_command = "curl http://192.168.11.21.:8080/shake/1/cube/0.2/0/0";
+
+          curl_command = "curl http://192.168.11.21.:8080/shake/1/cube/";
+
+          float x_accel = ((float)grav_x / 640) - 0.5;
+
+          //printf("%f ", x_accel);
+          curl_command += to_string(x_accel);
+          curl_command += "/0/0";
+
+          printf("%s\n", curl_command.c_str());
+          system(curl_command.c_str());
+        }
+
         cvShowImage("opencvtest", img);
         cvWaitKey(10);
     }
-    
+
     return EXIT_SUCCESS;
 }
 catch(const rs::error & e)
