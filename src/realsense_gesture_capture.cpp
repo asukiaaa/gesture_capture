@@ -79,7 +79,7 @@ int main() try
                 if ( TARGET_DEPTH_MIN < depth &&
                      depth < TARGET_DEPTH_MAX) {
                   //*target_pixel = depth/50;
-                  *target_pixel = 255;
+                  *target_pixel = (char)255;
                   grav_x += x;
                   grav_y += y;
                   grav_count ++;
@@ -112,7 +112,7 @@ int main() try
           curl_command += "/0/0";
 
           printf("%s\n", curl_command.c_str());
-          system(curl_command.c_str());
+          system((const char*)curl_command.c_str());
         }
 
         cvShowImage("opencvtest", img);
