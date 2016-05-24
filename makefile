@@ -7,6 +7,8 @@ OPENCV_FLAGS := -ggdb `pkg-config --cflags opencv` `pkg-config --libs opencv`
 
 CXXFLAGS := -std=c++11 -fPIC -pedantic -mssse3 -Ofast -Wno-missing-field-initializers
 
+LIBCURL_FLAGS := -lcurl
+
 # Compute a list of all example program binaries
 SOURCES := $(wildcard src/*.cpp)
 SOURCES := $(addprefix bin/, $(notdir $(basename $(SOURCES))))
@@ -23,4 +25,4 @@ bin:
 	mkdir -p bin
 
 bin/%: src/%.cpp
-	$(CXX) $< -o $@	 $(REALSENSE_FLAGS) $(GLFW3_FLAGS) $(OPENCV_FLAGS) $(CXXFLAGS)
+	$(CXX) $< -o $@	 $(REALSENSE_FLAGS) $(GLFW3_FLAGS) $(OPENCV_FLAGS) $(CXXFLAGS) $(LIBCURL_FLAGS)

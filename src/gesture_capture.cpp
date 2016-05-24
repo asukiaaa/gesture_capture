@@ -10,14 +10,74 @@
 #include <cstdio>
 #include <opencv2/highgui/highgui.hpp>
 #include <string>
+#include <curl/curl.h>
+#include <iostream>
 
 #define TARGET_DEPTH_MIN 1000
 #define TARGET_DEPTH_MAX 2500
 
 using namespace std;
 
+//
+// reference: https://curl.haxx.se/libcurl/c/getinfo.html
+//
+// If rolle of this class become large, it's better to use the following cpp package.
+// https://curl.haxx.se/libcurl/cplusplus/
+//
+class CurlManager {
+  private:
+  CURL* curl;
+  CURLcode res;
+  bool with_printing;
+
+  public:
+  CurlManager();
+  bool simple_get(string url);
+  bool simple_get(char* url);
+  bool simple_get(const char* url);
+};
+
+CurlManager::CurlManager() {
+  curl = curl_easy_init();
+  with_printing = false;
+}
+
+bool CurlManager::simple_get(string url) {
+  simple_get(url.c_str());
+}
+
+bool CurlManager::simple_get(char* url) {
+  simple_get((const char*)url);
+}
+
+bool CurlManager::simple_get(const char* url) {
+  if( curl ) {
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+
+    // stop printing to stdio
+    if (! with_printing) {
+      curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+    }
+
+    res = curl_easy_perform(curl);
+
+    if ( CURLE_OK == res ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+//
+// main process
+//
 int main() try
 {
+
+    // CURL
+    CurlManager curl_manager;
+
     // Create a context object. This object owns the handles to all connected realsense devices.
     rs::context ctx;
     printf("There are %d connected RealSense devices.\n", ctx.get_device_count());
@@ -37,10 +97,9 @@ int main() try
     const uint16_t one_meter = static_cast<uint16_t>(1.0f / dev->get_depth_scale());
 
     // Opencv values
-    //IplImage* img = cvLoadImage("/home/asuki/Downloads/nano.png", CV_LOAD_IMAGE_COLOR);
     IplImage* img = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, 1);
-    cvNamedWindow("opencvtest", CV_WINDOW_AUTOSIZE);
-    cvShowImage("opencvtest", img);
+    cvNamedWindow("realsense_depth", CV_WINDOW_AUTOSIZE);
+    cvShowImage("realsense_depth", img);
 
     int grav_x;
     int grav_y;
@@ -59,35 +118,26 @@ int main() try
         // Retrieve depth data, which was previously configured as a 640 x 480 image of 16-bit depth values
         const uint16_t * depth_frame = reinterpret_cast<const uint16_t *>(dev->get_frame_data(rs::stream::depth));
 
-        // Print a simple text-based representation of the image, by breaking it into 10x20 pixel regions and and approximating the coverage of pixels within one meter
-        char buffer[(640/10+1)*(480/20)+1];
-        char * out = buffer;
-        int coverage[64] = {};
         for(int y=0; y<480; ++y)
         {
             for(int x=0; x<640; ++x)
             {
                 int depth = *depth_frame++;
-                if(depth > 0 && depth < one_meter) ++coverage[x/10];
 
-                // if(x%20 == 19 && y%20 == 19) {
-                //   printf("%.4d ", depth);
-                // }
-
-                //img->imageData[(y*img->widthStep) + x] = depth/50;
-                char* target_pixel = &(img->imageData[(y*img->widthStep) + x]);
+                char* output_pixel = &(img->imageData[(y*img->widthStep) + x]);
                 if ( TARGET_DEPTH_MIN < depth && depth < TARGET_DEPTH_MAX)
                 {
-                    //*target_pixel = depth/50;
-                    *target_pixel = (char)255;
+                    *output_pixel = (char)255;
                     grav_x += x;
                     grav_y += y;
                     grav_count ++;
                 }
                 else
                 {
-                    *target_pixel = (char)0;
+                    *output_pixel = (char)0;
                 }
+            }
+
             string curl_command = "";
             //curl_command = "curl http://192.168.11.21.:8080/shake/2/cube";
             // 0.2 means x acceleration
@@ -102,10 +152,11 @@ int main() try
             curl_command += "/0/0";
 
             printf("%s\n", curl_command.c_str());
-            system((const char*)curl_command.c_str());
+            curl_manager.simple_get(curl_command);
+            //cout << curl_manager.simple_get(curl_command) << endl;
         }
 
-        cvShowImage("opencvtest", img);
+        cvShowImage("realsense_depth", img);
         cvWaitKey(10);
     }
 
