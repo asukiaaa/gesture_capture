@@ -6,7 +6,7 @@
 //
 // 2016.05.24 Asuki Kono
 //
-// License
+// License: MIT
 //
 // reference: librealsense tutorial #1(Apache 2.0)
 // https://github.com/IntelRealSense/librealsense/blob/master/examples/cpp-tutorial-1-depth.cpp
