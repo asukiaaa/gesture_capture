@@ -13,14 +13,18 @@
 //
 #include <cstdio>
 #include <curl/curl.h>
+#include <GLFW/glfw3.h>
 #include <iostream>
 #include <librealsense/rs.hpp>
-#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/highgui/highgui.hpp>
 #include <string>
 #include <unistd.h>
 
 #define TARGET_DEPTH_MIN 1000
 #define TARGET_DEPTH_MAX 2500
+
+#define IMAGE_WIDTH 640
+#define IMAGE_HEIGHT 480
 
 using namespace std;
 
@@ -94,45 +98,56 @@ int main() try {
   rs::device * dev = ctx.get_device(0);
 
   // Configure depth to run at VGA resolution at 30 frames per second
-  dev->enable_stream(rs::stream::depth, 640, 480, rs::format::z16, 30);
+  dev->enable_stream(rs::stream::depth, IMAGE_WIDTH, IMAGE_HEIGHT, rs::format::z16, 30);
   dev->start();
 
   // Determine depth value corresponding to one meter
   const uint16_t one_meter = static_cast<uint16_t>(1.0f / dev->get_depth_scale());
 
   // Opencv values
-  IplImage* img = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, 1);
-  cvNamedWindow("realsense_depth", CV_WINDOW_AUTOSIZE);
+  // IplImage* img = cvCreateImage(cvSize(IMAGE_WIDTH, IMAGE_HEIGHT), IPL_DEPTH_8U, 1);
+  // cvNamedWindow("realsense_depth", CV_WINDOW_AUTOSIZE);
 
   // Gravity values
   int grav_x;
   int grav_y;
   int grav_count;
 
-  while(true) {
+  // Open a GLFW window
+  glfwInit();
+  std::ostringstream ss; ss << "Gravity image";
+  GLFWwindow * win = glfwCreateWindow(IMAGE_WIDTH, IMAGE_HEIGHT, ss.str().c_str(), 0, 0);
+  glfwSetWindowUserPointer(win, &dev);
+  glfwMakeContextCurrent(win);
+  glfwSwapBuffers(win);
+
+  char buffer[IMAGE_WIDTH * IMAGE_HEIGHT];
+
+  while(!glfwWindowShouldClose(win)) {
     grav_x = 0;
     grav_y = 0;
     grav_count = 0;
 
-    // This call waits until a new coherent set of frames is available on a device
-    // Calls to get_frame_data(...) and get_frame_timestamp(...) on a device will return stable values until wait_for_frames(...) is called
+    glfwPollEvents();
     dev->wait_for_frames();
 
-    // Retrieve depth data, which was previously configured as a 640 x 480 image of 16-bit depth values
     const uint16_t * depth_frame = reinterpret_cast<const uint16_t *>(dev->get_frame_data(rs::stream::depth));
 
     for(int y=0; y<480; ++y) {
       for(int x=0; x<640; ++x) {
         int depth = *depth_frame++;
-        char* output_pixel = &(img->imageData[(y*img->widthStep) + x]);
+        // char* output_pixel = &(img->imageData[(y*img->widthStep) + x]);
+        char* target_buffer = &(buffer[x + (IMAGE_HEIGHT - 1 - y)*IMAGE_WIDTH]);
 
         if ( TARGET_DEPTH_MIN < depth && depth < TARGET_DEPTH_MAX) {
-          *output_pixel = (char)255;
+          // *output_pixel = (char)255;
+          *target_buffer = (char)255;
           grav_x += x;
           grav_y += y;
           grav_count ++;
         } else {
-          *output_pixel = (char)0;
+          // *output_pixel = (char)0;
+          *target_buffer = (char)0;
         }
       }
     }
@@ -176,14 +191,19 @@ int main() try {
       //   "/0/0";
       // cout << url << endl;
 
-      curl_manager.simple_get(url);
+      //curl_manager.simple_get(url);
       usleep(1000000);
     }
 
-    cvShowImage("realsense_depth", img);
-    cvWaitKey(10);
+    glDrawPixels(IMAGE_WIDTH, IMAGE_HEIGHT, GL_LUMINANCE, GL_UNSIGNED_BYTE, buffer);
+    glfwSwapBuffers(win);
+
+    //cvShowImage("realsense_depth", img);
+    //cvWaitKey(10);
   }
 
+  glfwDestroyWindow(win);
+  glfwTerminate();
   return EXIT_SUCCESS;
 } catch(const rs::error & e) {
   // Method calls against librealsense objects may throw exceptions of type rs::error

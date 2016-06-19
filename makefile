@@ -6,7 +6,7 @@ REALSENSE_FLAGS := -Iinclude -Llib -lrealsense -lm
 
 GLFW3_FLAGS := `pkg-config --cflags --libs glfw3 glu gl`
 
-OPENCV_FLAGS := -ggdb `pkg-config --cflags opencv` `pkg-config --libs opencv`
+# OPENCV_FLAGS := -ggdb `pkg-config --cflags opencv` `pkg-config --libs opencv`
 
 CXXFLAGS := -std=c++11 -fPIC -pedantic -mssse3 -Ofast -Wno-missing-field-initializers
 
@@ -34,4 +34,4 @@ bin:
 	mkdir -p bin
 
 bin/%: src/%.cpp
-	$(CXX) $< -o $@	 $(REALSENSE_FLAGS) $(GLFW3_FLAGS) $(OPENCV_FLAGS) $(CXXFLAGS) $(LIBCURL_FLAGS)
+	$(CXX) $< -o $@	 $(REALSENSE_FLAGS) $(GLFW3_FLAGS) $(CXXFLAGS) $(LIBCURL_FLAGS)
