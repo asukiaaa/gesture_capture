@@ -17,6 +17,7 @@
 #include <librealsense/rs.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <string>
+#include <unistd.h>
 
 #define TARGET_DEPTH_MIN 1000
 #define TARGET_DEPTH_MAX 2500
@@ -145,19 +146,38 @@ int main() try {
 
     if ( grav_count > 1000 ) {
       string url;
-      // url = "http://192.168.11.21.:8080/shake/2/cube";
-      // url = "http://192.168.11.21.:8080/shake/1/cube/0.2/0/0";
+      string kind;
+      //  "tanbarin"
+      //  "guitar"
+      //  "rappa"
+      //  "piano"
+      if ( grav_x < 320 ) {
+        if ( grav_y < 240 ) {
+          kind = "guitar";
+        } else {
+          kind = "tanbarin";
+        }
+      } else {
+        if ( grav_y > 240 ) {
+          kind = "piano";
+        } else {
+          kind = "rappa";
+        }
+      }
 
-      float x_accel = ((float)grav_x / 640) - 0.5;
-      //cout << x_accel << endl;
       url =
-        "http://192.168.11.21.:8080/shake/1/cube/" +
-        to_string(x_accel) +
-        "/0/0";
+        "http://192.168.11.12.:8080/shake/3/" + kind;
       cout << url << endl;
-      
+
+      // float x_accel = ((float)grav_x / 640) - 0.5;
+      // url =
+      //   "http://192.168.11.21.:8080/shake/1/cube/" +
+      //   to_string(x_accel) +
+      //   "/0/0";
+      // cout << url << endl;
+
       curl_manager.simple_get(url);
-      //cout << curl_manager.simple_get(url) << endl;
+      usleep(1000000);
     }
 
     cvShowImage("realsense_depth", img);
