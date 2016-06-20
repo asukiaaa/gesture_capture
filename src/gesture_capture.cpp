@@ -191,7 +191,7 @@ int main() try {
       //   "/0/0";
       // cout << url << endl;
 
-      //curl_manager.simple_get(url);
+      curl_manager.simple_get(url);
       usleep(1000000);
     }
 
