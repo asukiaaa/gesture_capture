@@ -44,6 +44,12 @@ cd [librealsense_dir]
 sudo bin/cpp-gesture_capture
 ```
 
+# Options
+You can set target url for curl.
+```
+sudo bin/gesture_capture.cpp --url http://localhost:1234
+```
+
 # License
 MIT
 

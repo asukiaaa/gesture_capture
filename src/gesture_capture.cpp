@@ -84,7 +84,24 @@ bool CurlManager::simple_get(const char* url) {
 //
 // main process
 //
-int main() try {
+int main(int argc, char* argv[]) try {
+
+  // Default URL setting
+  string target_url;
+  target_url = "http://localhost:8080";
+
+  // Arguments check
+  for ( int i = 1; i < argc; i++ ) {
+    string target_arg = argv[i];
+    if ( target_arg == "--url" ) {
+      if ( i + 1 < argc ) {
+        i++;
+        target_url = argv[i];
+      } else {
+        cerr << "--url option requires one argument." << endl;
+      }
+    }
+  }
 
   // CURL
   CurlManager curl_manager;
@@ -160,7 +177,7 @@ int main() try {
     printf("%d, %d, %d\n", grav_x, grav_y, grav_count);
 
     if ( grav_count > 1000 ) {
-      string url;
+      string request_url;
       string kind;
       //  "tanbarin"
       //  "guitar"
@@ -180,18 +197,17 @@ int main() try {
         }
       }
 
-      url =
-        "http://192.168.11.12.:8080/shake/3/" + kind;
-      cout << url << endl;
+      request_url = target_url + "/shake/3/" + kind;
+      cout << request_url << endl;
 
       // float x_accel = ((float)grav_x / 640) - 0.5;
       // url =
-      //   "http://192.168.11.21.:8080/shake/1/cube/" +
+      //   target_url + "/shake/1/cube/" +
       //   to_string(x_accel) +
       //   "/0/0";
       // cout << url << endl;
 
-      curl_manager.simple_get(url);
+      curl_manager.simple_get(request_url);
       usleep(1000000);
     }
 
